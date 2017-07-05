@@ -1,0 +1,106 @@
+{
+  "mappings": {
+    "dwelling": {
+      "properties": {
+        "address_line_1": {
+          "type": "string"
+        },
+        "address_line_2": {
+          "type": "string"
+        },
+        "area_size": {
+          "type": "string"
+        },
+        "contact_number": {
+          "type": "string"
+        },
+        "county": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "daft_link": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "dwelling_type": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "facilities": {
+          "type": "string",
+          "analyzer": "comma"
+        },
+        "formalised_address": {
+          "type": "string"
+        },
+        "listing_image": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "num_bathrooms": {
+          "type": "integer"
+        },
+        "num_bedrooms": {
+          "type": "integer"
+        },
+        "price": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "price_change": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "price_number": {
+          "type": "integer"
+        },
+        "price_month": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "town": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "viewings": {
+          "type": "string"
+        },
+        "features": {
+          "type": "string"
+        },
+        "agent": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "agent_url": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "posted_since": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "comma": {
+          "type": "pattern",
+          "pattern": ","
+        }
+      },
+      "analyzer": {
+        "comma": {
+          "type": "custom",
+          "tokenizer": "comma"
+        }
+      }
+    }
+  },
+  "warmers": {}
+}
