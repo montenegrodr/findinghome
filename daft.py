@@ -46,6 +46,8 @@ def to_dict(listing):
         price_number = int(re.sub('\D', '', price))
         if 'week' in price.lower():
             price_month = price_number * 4
+        else:
+            price_month = price_number
     except:
         pass
 
