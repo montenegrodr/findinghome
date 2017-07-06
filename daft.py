@@ -25,16 +25,19 @@ def main():
 
     es = Elasticsearch([host])
 
-    for rent_type in cycle(RentType):
-        try:
-            for doc, id in documents(rent_type):
-                es.index(index,
-                         doc_type,
-                         doc,
-                         id)
-        except Exception as exp:
-            logging.error('Unexpected error: {}. Sleeping a while'.format(exp))
-            time.sleep(60)
+    while True:
+        for rent_type in RentType:
+            try:
+                for doc, id in documents(rent_type):
+                    es.index(index,
+                             doc_type,
+                             doc,
+                             id)
+            except Exception as exp:
+                logging.error('Unexpected error: {}. Sleeping a while'.format(exp))
+                time.sleep(60)
+        logging.info('Resting a bit')
+        time.sleep(60 * 10)
 
 
 def to_dict(listing):
@@ -83,6 +86,7 @@ def documents(rent_type):
         url = dwelling.get('daft_link', '')
         if url:
             yield dwelling, hashlib.sha1(url).hexdigest()
+
 
 def dwellings(rent_type):
     offset = 0
