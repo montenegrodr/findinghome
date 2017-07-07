@@ -31,14 +31,12 @@ def main():
         for rent_type in rent_types:
             try:
                 for doc, id in documents(rent_type):
-                    es.index(index,
-                             doc_type,
-                             doc,
-                             id)
+                    if not es.exists(index, doc_type, doc, id):
+                        es.index(index, doc_type, doc, id)
             except Exception as exp:
-                logging.error('Unexpected error: {}. Sleeping a while'.format(exp))
+                logging.error('Unexpected error: {}. Sleeping a while.'.format(exp))
                 time.sleep(60)
-        logging.info('Resting a bit')
+        logging.info('Resting a bit.')
         time.sleep(60 * 10)
 
 
