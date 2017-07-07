@@ -2,13 +2,14 @@ import re
 import os
 import sys
 import time
+import random
 import logging
 import hashlib
+import warnings
 
-from itertools import cycle
 from datetime import datetime
-from daftlistings import Daft, RentType
 from elasticsearch import Elasticsearch
+from daftlistings import Daft, RentType
 
 
 def main():
@@ -24,9 +25,10 @@ def main():
         sys.exit('Invalid DOC_TYPE value: {}'.format(doc_type))
 
     es = Elasticsearch([host])
-
+    rent_types = list(RentType)
     while True:
-        for rent_type in RentType:
+        random.shuffle(rent_types)
+        for rent_type in rent_types:
             try:
                 for doc, id in documents(rent_type):
                     es.index(index,
@@ -106,4 +108,6 @@ def dwellings(rent_type):
 
 
 if __name__ == '__main__':
+    warnings.simplefilter('ignore')
+    logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
     main()
