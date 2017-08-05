@@ -10,13 +10,13 @@ import warnings
 from datetime import datetime
 from elasticsearch import Elasticsearch
 from daftlistings import Daft, RentType
+from proxy import findproxy, CouldNotFetchProxyList,CouldNotFindProxy
 
 
 def main():
     host = os.environ.get('ES_HOST')
     index = os.environ.get('INDEX')
     doc_type = os.environ.get('DOC_TYPE')
-    proxy = os.environ.get('PROXY', '')
 
     if not host:
         sys.exit('Invalid ES_HOST value: {}'.format(host))
@@ -31,9 +31,20 @@ def main():
         random.shuffle(rent_types)
         for rent_type in rent_types:
             try:
-                for doc, id in documents(rent_type, proxy):
+                logging.info('Looking for a proxy...')
+                proxy = findproxy()
+                logging.info('Found if {}'.format(proxy))
+                con_conf = {
+                    'proxy': proxy,
+                    'timwout': 2
+                }
+                for doc, id in documents(rent_type, con_conf):
                     if not es.exists(index, doc_type, id):
-                        es.index(index, doc_type, doc, id)
+                        es.index(index, doc_type, to_dict(doc), id)
+            except CouldNotFetchProxyList:
+                logging.error('CouldNotFetchProxyList.')
+            except CouldNotFindProxy:
+                logging.error('CouldNotFindProxy.')
             except Exception as exp:
                 logging.error('Unexpected error: {}. Sleeping a while.'.format(exp))
                 time.sleep(60)
@@ -82,16 +93,16 @@ def to_dict(listing):
     }
 
 
-def documents(rent_type, proxy):
-    for dwelling in dwellings(rent_type, proxy):
-        url = dwelling.get('daft_link', '')
+def documents(rent_type, con_conf):
+    for dwelling in dwellings(rent_type, con_conf):
+        url = dwelling.get_daft_link()
         if url:
             yield dwelling, hashlib.sha1(url).hexdigest()
 
 
-def dwellings(rent_type, proxy):
+def dwellings(rent_type, con_conf):
     offset = 0
-    daft = Daft(proxy=proxy)
+    daft = Daft(con_conf=con_conf)
     daft.set_listing_type(rent_type)
     daft.set_county('Dublin City')
     daft.set_offset(offset)
@@ -100,7 +111,7 @@ def dwellings(rent_type, proxy):
     while listings:
         listings = daft.get_listings()
         for listing in listings:
-            yield to_dict(listing)
+            yield listing
 
         offset += len(listings)
         daft.set_offset(offset)
