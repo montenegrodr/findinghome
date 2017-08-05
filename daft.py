@@ -16,6 +16,7 @@ def main():
     host = os.environ.get('ES_HOST')
     index = os.environ.get('INDEX')
     doc_type = os.environ.get('DOC_TYPE')
+    proxy = os.environ.get('PROXY', '')
 
     if not host:
         sys.exit('Invalid ES_HOST value: {}'.format(host))
@@ -30,7 +31,7 @@ def main():
         random.shuffle(rent_types)
         for rent_type in rent_types:
             try:
-                for doc, id in documents(rent_type):
+                for doc, id in documents(rent_type, proxy):
                     if not es.exists(index, doc_type, id):
                         es.index(index, doc_type, doc, id)
             except Exception as exp:
@@ -81,16 +82,16 @@ def to_dict(listing):
     }
 
 
-def documents(rent_type):
-    for dwelling in dwellings(rent_type):
+def documents(rent_type, proxy):
+    for dwelling in dwellings(rent_type, proxy):
         url = dwelling.get('daft_link', '')
         if url:
             yield dwelling, hashlib.sha1(url).hexdigest()
 
 
-def dwellings(rent_type):
+def dwellings(rent_type, proxy):
     offset = 0
-    daft = Daft()
+    daft = Daft(proxy=proxy)
     daft.set_listing_type(rent_type)
     daft.set_county('Dublin City')
     daft.set_offset(offset)
@@ -103,7 +104,6 @@ def dwellings(rent_type):
 
         offset += len(listings)
         daft.set_offset(offset)
-
 
 if __name__ == '__main__':
     warnings.simplefilter('ignore')
