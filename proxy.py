@@ -1,7 +1,7 @@
 import re
 import requests
 
-proxy_list_src = 'http://spys.me/proxy.txt'
+proxy_list_src = 'http://spys.one/pl.txt'
 daft_url = 'http://www.daft.ie/'
 ip_pattern = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\:\d{2,5}'
 
