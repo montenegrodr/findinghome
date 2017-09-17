@@ -34,7 +34,7 @@ def main():
                               id=id,
                               body={"doc": location})
             logging.info('All done for today. Sleeping for 12h.')
-            time.sleep(60*60*12)
+            time.sleep(60*60)
         except Exception as exp:
             logging.error('Updating location stopped. {}. Resting a bit.'.format(exp))
             time.sleep(60)
@@ -76,7 +76,7 @@ def dwellings(search):
         }
     ).extra(
         from_=0,
-        size=10
+        size=500
     )
     if s.count() > 0:
         for id, doc in [(h.get('_id'), h.get('_source')) for h in s.execute().hits.hits]:
