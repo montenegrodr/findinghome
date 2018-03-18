@@ -1,50 +1,25 @@
 import re
-import os
-import sys
 import time
 import random
 import logging
 import hashlib
 import warnings
+import argparse
 
 from datetime import datetime
-from elasticsearch import Elasticsearch
 from daftlistings import Daft, RentType
-from proxy import findproxy, CouldNotFetchProxyList,CouldNotFindProxy
+from orm import DataController
 
 
-def main():
-    host = os.environ.get('ES_HOST')
-    index = os.environ.get('INDEX')
-    doc_type = os.environ.get('DOC_TYPE')
-
-    if not host:
-        sys.exit('Invalid ES_HOST value: {}'.format(host))
-    if not index:
-        sys.exit('Invalid INDEX value: {}'.format(index))
-    if not doc_type:
-        sys.exit('Invalid DOC_TYPE value: {}'.format(doc_type))
-
-    es = Elasticsearch([host])
+def main(args):
     rent_types = list(RentType)
     while True:
         random.shuffle(rent_types)
         for rent_type in rent_types:
             try:
-                logging.info('Looking for a proxy...')
-                proxy = findproxy()
-                logging.info('Found if {}'.format(proxy))
-                con_conf = {
-                    'proxy': proxy,
-                    'timwout': 2
-                }
-                for doc, id in documents(rent_type, con_conf):
-                    if not es.exists(index, doc_type, id):
-                        es.index(index, doc_type, to_dict(doc), id)
-            except CouldNotFetchProxyList:
-                logging.error('CouldNotFetchProxyList.')
-            except CouldNotFindProxy:
-                logging.error('CouldNotFindProxy.')
+                with DataController(con_str=args.connection_string) as ds:
+                    for doc in documents(rent_type, {}):
+                        ds.insert(doc)
             except Exception as exp:
                 logging.error('Unexpected error: {}. Sleeping a while.'.format(exp))
                 time.sleep(60)
@@ -52,7 +27,7 @@ def main():
         time.sleep(60 * 10)
 
 
-def to_dict(listing):
+def to_dict(listing, id):
     price = listing.get_price()
     price_number = None
     price_month = None
@@ -67,6 +42,7 @@ def to_dict(listing):
         pass
 
     return {
+        'hash': id,
         'price': listing.get_price(),
         'price_number': price_number,
         'price_month': price_month,
@@ -97,7 +73,7 @@ def documents(rent_type, con_conf):
     for dwelling in dwellings(rent_type, con_conf):
         url = dwelling.get_daft_link()
         if url:
-            yield dwelling, hashlib.sha1(url).hexdigest()
+            yield to_dict(dwelling, hashlib.sha1(url).hexdigest())
 
 
 def dwellings(rent_type, con_conf):
@@ -116,7 +92,13 @@ def dwellings(rent_type, con_conf):
         offset += len(listings)
         daft.set_offset(offset)
 
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--connection_string', type=str)
+    return parser.parse_args()
+
 if __name__ == '__main__':
     warnings.simplefilter('ignore')
     logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
-    main()
+    main(parse_args())
