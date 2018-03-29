@@ -94,7 +94,7 @@ class DataController(object):
             county=doc.get('county'),
             daft_link=doc.get('daft_link'),
             dwelling_type=doc.get('dwelling_type'),
-            facilities=','.join(doc.get('facilities')),
+            facilities=','.join(doc.get('facilities', [])),
             formalised_address=doc.get('formalised_address'),
             listing_image=doc.get('listing_image'),
             num_bathrooms=doc.get('num_bathrooms'),
