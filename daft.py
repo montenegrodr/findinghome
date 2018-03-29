@@ -22,9 +22,9 @@ def main(args):
                         ds.insert(doc)
             except Exception as exp:
                 logging.error('Unexpected error: {}. Sleeping a while.'.format(exp))
-                time.sleep(60)
+                time.sleep(1)
         logging.info('Resting a bit.')
-        time.sleep(60 * 10)
+        time.sleep(1 * 1)
 
 
 def to_dict(listing, id):
@@ -48,7 +48,7 @@ def to_dict(listing, id):
         'price_month': price_month,
         'price_change': listing.get_price_change(),
         'viewings': listing.get_upcoming_viewings(),
-        'facilities': [l for sl in listing.get_facilities() for l in sl] if listing.get_facilities() else None,
+        'facilities': [l for sl in listing.get_facilities() for l in sl] if listing.get_facilities() else [],
         'features': listing.get_features(),
         'formalised_address': listing.get_formalised_address(),
         'address_line_1': listing.get_address_line_1(),
