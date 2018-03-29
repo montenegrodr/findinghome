@@ -22,9 +22,9 @@ def main(args):
                         ds.insert(doc)
             except Exception as exp:
                 logging.error('Unexpected error: {}. Sleeping a while.'.format(exp))
-                time.sleep(1)
+                time.sleep(60)
         logging.info('Resting a bit.')
-        time.sleep(1 * 1)
+        time.sleep(60 * 10)
 
 
 def to_dict(listing, id):
