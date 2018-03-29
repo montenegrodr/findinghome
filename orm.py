@@ -105,7 +105,7 @@ class DataController(object):
             price_month=doc.get('price_month'),
             timestamp=doc.get('timestamp'),
             town=doc.get('town'),
-            viewings=','.join(doc.get('viewings')),
+            viewings=','.join(doc.get('viewings', [])),
             features=doc.get('features'),
             agent=doc.get('agent'),
             agent_url=doc.get('agent_url'),
