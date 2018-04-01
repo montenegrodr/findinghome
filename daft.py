@@ -9,7 +9,7 @@ import argparse
 from datetime import datetime
 from daftlistings import Daft, RentType
 from orm import DataController
-
+from letmecrawl import letmecrawl
 
 def main(args):
     rent_types = list(RentType)
@@ -18,8 +18,13 @@ def main(args):
         for rent_type in rent_types:
             try:
                 with DataController(con_str=args.connection_string) as ds:
-                    for doc in documents(rent_type, {}):
-                        ds.insert(doc)
+                    for proxy in letmecrawl():
+                        con_conf = {
+                            'proxy': 'http://{}:{}'.format(proxy.ip, proxy.port),
+                            'timeout': 2
+                        }
+                        for doc in documents(rent_type, con_conf):
+                            ds.insert(doc)
             except Exception as exp:
                 logging.error('Unexpected error: {}. Sleeping a while.'.format(exp))
                 time.sleep(60)
