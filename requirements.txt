@@ -9,7 +9,7 @@ elasticsearch-dsl==2.2.0
 enum34==1.1.6
 idna==2.5
 python-dateutil==2.7.0
-requests==2.18.1
+requests==2.20.0
 six==1.11.0
 urllib3==1.21.1
 wsgiref==0.1.2
